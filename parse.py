@@ -43,6 +43,9 @@ class Parse:
         # Regla para la definición de funciones
         self.eat('VOID')  # Consume la palabra clave 'void'
         self.eat('ID')  # Consume el nombre de la función
+        self.eat('WHILE') # Consyme la palabra clave 'while'
+        self.eat('DO') # Consume la palabra clave 'do'
+        self.eat('FOR') # Consume la palabra clave 'for'
         self.eat('LPAREN')  # Consume el paréntesis izquierdo
         # Puede incluir argumentos aquí
         self.eat('RPAREN')  # Consume el paréntesis derecho
@@ -50,5 +53,28 @@ class Parse:
         self.eat('LBRACE')  # Consume la llave izquierda
         # Puede contener declaraciones de variables, instrucciones, etc.
         self.eat('RBRACE')  # Consume la llave derecha
+        
+
+    def while_statement(self):
+        self.eat:('WHILE')
+        self.eat:('LPAREN')
+        self.expression()  # Aquí deberías implementar el análisis de la expresión
+        self.eat('RPAREN') 
+        self.eat('LBRACE')
+
+        while self.current_token.type != 'RBRACE':
+            self.statement()
+        self.eat('RBRACE')
+
+    def do_while_statement(self):
+        self.eat:('DO')
+        self.eat:('LBRACE')
+        while self.current_token.type != 'RBRACE':
+            self.statement()
+        self.eat('RBRACE') 
+        self.eat:('WHILE')
+        self.eat('LPAREN')
+        self.expression()  # Aquí deberías implementar el análisis de la expresión
+        self.eat('RPAREN')
 
     
