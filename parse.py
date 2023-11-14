@@ -46,6 +46,7 @@ class Parse:
         self.eat('WHILE') # Consyme la palabra clave 'while'
         self.eat('DO') # Consume la palabra clave 'do'
         self.eat('FOR') # Consume la palabra clave 'for'
+        self.eat('IF') # Consume la palabra clave 'if'
         self.eat('LPAREN')  # Consume el paréntesis izquierdo
         # Puede incluir argumentos aquí
         self.eat('RPAREN')  # Consume el paréntesis derecho
@@ -86,6 +87,14 @@ class Parse:
             self.statement()
         self.eat('RBRACE')
 
-    def if_statement(self):   
+    def if_statement(self): 
+        self.eat('IF')
+        self.eat:('LPAREN')
+        self.expression()  # Aquí deberías implementar el análisis de la expresión
+        self.eat('RPAREN') 
+        self.eat('LBRACE')
+        if self.current_token.type != 'RBRACE':
+            self.statement()
+        self.eat('RBRACE') 
 
     
