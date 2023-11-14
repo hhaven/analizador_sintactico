@@ -61,12 +61,11 @@ class Parse:
         self.expression()  # Aquí deberías implementar el análisis de la expresión
         self.eat('RPAREN') 
         self.eat('LBRACE')
-
         while self.current_token.type != 'RBRACE':
             self.statement()
         self.eat('RBRACE')
 
-    def do_while_statement(self):
+    def do_statement(self):
         self.eat:('DO')
         self.eat:('LBRACE')
         while self.current_token.type != 'RBRACE':
@@ -76,5 +75,17 @@ class Parse:
         self.eat('LPAREN')
         self.expression()  # Aquí deberías implementar el análisis de la expresión
         self.eat('RPAREN')
+
+    def for_statement(self):
+        self.eat('FOR')
+        self.eat:('LPAREN')
+        self.expression()  # Aquí deberías implementar el análisis de la expresión
+        self.eat('RPAREN') 
+        self.eat('LBRACE')
+        for self.current_token.type != 'RBRACE':
+            self.statement()
+        self.eat('RBRACE')
+
+    def if_statement(self):   
 
     
