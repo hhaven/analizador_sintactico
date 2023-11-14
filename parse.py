@@ -1,9 +1,11 @@
-##importar lexer
+from symbol_table import SymbolTable
+
 
 class Parse:
     def __init__(self, lexer):
         self.lexer = lexer
         self.current_token = None
+        self.symbol_table = SymbolTable()
 
     def parse(self):
         self.current_token = self.lexer.get_next_token()
@@ -13,68 +15,75 @@ class Parse:
         raise Exception(f"Error sintáctico: {message}")
 
     def eat(self, token_type):
-        if self.current_token.type == token_type:
+        if self.current_token[0] == token_type:  # Cambio aquí para acceder al tipo de token
             self.current_token = self.lexer.get_next_token()
         else:
-            self.error(f"Se esperaba {token_type} pero se encontró {self.current_token.type}")
+            self.error(f"Se esperaba {token_type} pero se encontró {self.current_token[0]}")  # Cambio aquí
 
     def program(self):
         # Regla inicial del programa
         # El EOF es para identificar el end of file.
-        while self.current_token.type != 'EOF':
-            if self.current_token.type in ('INT', 'CHAR', 'FLOAT'):
-                self.variable_declaration()
-            elif self.current_token.type == 'VOID':
-                self.function_definition()
-            elif self.current_token.type == 'IF':
+        while self.current_token[0] != 'EOF':  # Cambio aquí para acceder al tipo de token
+            if self.current_token[0] == 'INCLUDE':
+                self.eat('INCLUDE')
+            elif self.current_token[0] in ('TYPE'):  # Cambio aquí
+                self.function_or_variable_declaration()
+            elif self.current_token[0] == 'IF':  # Cambio aquí
                 self.if_statement()
             else:
-                self.error(f"Token inesperado: {self.current_token.type}")
-        print("Análisis sintáctico completado con éxito.")
+                self.error(f"Token inesperado: {self.current_token[0]}")  # Cambio aquí
 
     def variable_declaration(self):
         # Regla para la declaración de variables
-        data_type = self.current_token
-        self.eat(self.current_token.type)  # Consume el tipo de datos
-        self.eat('ID')  # Consume el identificador de la variable
-        self.eat('SEMI')  # Consume el punto y coma al final
+        type = self.current_token[0]  # Tipo de la variable
+        self.eat('TYPE')
+        identifier = self.current_token[1]  # Nombre de la variable
+        self.eat('ID')
+        # Aquí puedes manejar el valor inicial si es necesario
+        value = None
+        self.eat('SEMICOLON')
+
+        # Añadir a la tabla de símbolos
+        self.symbol_table.add(identifier, type, value, self.lexer.line_number)
+
+    def function_or_variable_declaration(self):
+        self.eat('TYPE')  # Consume el tipo 
+
+        if self.current_token[0] != 'ID':
+            self.error("Se esperaba un identificador")
+
+        self.eat('ID')  # Consume el identificador
+
+        # Determina si es una declaración de función o una variable basándose en el token siguiente
+        if self.current_token[0] == 'LPAREN':
+            self.function_definition()
+        elif self.current_token[0] == 'SEMICOLON':
+            self.variable_declaration()
+        else:
+            self.error(f"Se esperaba LPAREN o SEMICOLON pero se encontró {self.current_token[0]}")
 
     def function_definition(self):
-        # Regla para la definición de funciones
-        self.eat('VOID')  # Consume la palabra clave 'void'
-        self.eat('ID')  # Consume el nombre de la función
-        self.eat('WHILE') # Consyme la palabra clave 'while'
-        self.eat('DO') # Consume la palabra clave 'do'
-        self.eat('FOR') # Consume la palabra clave 'for'
+        self.symbol_table.enter_scope()  # Entrar en el ámbito de la función
         self.eat('LPAREN')  # Consume el paréntesis izquierdo
-        # Puede incluir argumentos aquí
-        self.eat('RPAREN')  # Consume el paréntesis derecho
-        # Puede incluir el cuerpo de la función aquí
-        self.eat('LBRACE')  # Consume la llave izquierda
-        # Puede contener declaraciones de variables, instrucciones, etc.
-        self.eat('RBRACE')  # Consume la llave derecha
         
+        # Manejar los argumentos de la función
+        while self.current_token[0] != 'RPAREN':
+            arg_type = self.current_token[0]
+            self.eat(arg_type)  # Consume el tipo del argumento
 
-    def while_statement(self):
-        self.eat:('WHILE')
-        self.eat:('LPAREN')
-        self.expression()  # Aquí deberías implementar el análisis de la expresión
-        self.eat('RPAREN') 
+            if self.current_token[0] == 'ID':
+                arg_name = self.current_token[1]
+                self.eat('ID')  # Consume el nombre del argumento
+
+                # Registrar el argumento en la tabla de símbolos
+                self.symbol_table.add(arg_name, arg_type, None, self.lexer.line_number)
+
+        self.eat('RPAREN')  # Consume el paréntesis derecho
         self.eat('LBRACE')
+        # Aquí manejarías el cuerpo de la función, incluyendo declaraciones de variables locales
+        # ...
 
-        while self.current_token.type != 'RBRACE':
-            self.statement()
-        self.eat('RBRACE')
-
-    def do_while_statement(self):
-        self.eat:('DO')
-        self.eat:('LBRACE')
-        while self.current_token.type != 'RBRACE':
-            self.statement()
-        self.eat('RBRACE') 
-        self.eat:('WHILE')
-        self.eat('LPAREN')
-        self.expression()  # Aquí deberías implementar el análisis de la expresión
-        self.eat('RPAREN')
-
-    
+        self.eat('RBRACE')  # Consume la llave derecha que cierra el cuerpo de la función
+        print(f"Añadido a la tabla de símbolos: {arg_name}, {arg_type}")
+        self.symbol_table.exit_scope()  # Salir del ámbito de la función
+        
