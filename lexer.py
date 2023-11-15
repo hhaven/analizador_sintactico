@@ -1,79 +1,70 @@
-import re
+import ply.lex as lex
 
-# Expresiones
-token_patterns = [
-    (r'\/\*[\s\S]*?\*\/', 'COMMENT_MULTILINE'),  # Token para comentarios multilínea "/* ... */"
-    (r'\/\/[^\n]*', 'COMMENT_LINE'),  # Token para comentarios de línea "// ..."
-    (r'if', 'IF'),  # Token para la palabra clave "if"
-    (r'else', 'ELSE'),  # Token para la palabra clave "else"
-    (r'while', 'WHILE'),  # Token para la palabra clave "while"
-    (r'return', 'RETURN'),  # Token para la palabra clave "return"
-    (r'class', 'CLASS'),  # Token para la palabra clave "class"
-    (r'int|float|char|void', 'TYPE'),  # Token para tipos de datos (int, float, char, void)
-    (r'\d+\.\d+[eE][+-]?\d+', 'DOUBLE'),  # Token para números de doble precisión en notación científica
-    (r'\d+\.\d+', 'FLOAT'),         # Token para números de punto flotante
-    (r'\d+', 'NUM'),                # Token para números enteros
-    (r'\+', 'PLUS'),  # Token para el operador de suma "+"
-    (r'-', 'MINUS'),  # Token para el operador de resta "-"
-    (r'\*', 'TIMES'),  # Token para el operador de multiplicación "*"
-    (r'/', 'DIVIDE'),  # Token para el operador de división "/"
-    (r'\(', 'LPAREN'),  # Token para el paréntesis izquierdo "("
-    (r'\)', 'RPAREN'),  # Token para el paréntesis derecho ")"
-    (r'\{', 'LBRACE'),  # Token para la llave izquierda "{"
-    (r'\}', 'RBRACE'),  # Token para la llave derecha "}"
-    (r';', 'SEMICOLON'),  # Token para el punto y coma ";"
-    (r',', 'COMMA'),  # Token para la coma ","
-    (r'"[^"]*"', 'STRING'), # Token para cadenas de caracteres
-    (r'=', 'ASSIGN'),      # Token para  "="
-    (r'\+=', 'ADD_ASSIGN'), # Token para  "+="
-    (r'-=', 'SUB_ASSIGN'), # Token para  "-="
-    (r'>', 'GREATER_ASSIGN'), # Token para  "-="
-    (r'<', 'LESSER_ASSIGN'), # Token para  "-="
-    (r'#include\s*<.*?>', 'INCLUDE'), # Token para include
-    (r'[a-zA-Z_][a-zA-Z0-9_]*', 'ID'),  # Token para identificadores
-    (r'.', 'UNKNOWN'),
+# Lista de nombres de tokens
+tokens = [
+    'INCLUDE', 'ID', 'NUMBER', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
+    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
+    'SEMICOLON', 'COMMA', 'ASSIGN', 'STRING',
+    'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'AND', 'OR', 'NOT',
+    # Palabras reservadas
+    'IF', 'ELSE', 'FOR', 'WHILE', 'DO', 'VOID', 'RETURN', 'TYPE'
 ]
-# Expresión regular para ignorar espacios en blanco y saltos de línea
-ignore_pattern = r'[ \t\n]+'
 
-# Leer codigo
-class Lexer:
-    def __init__(self, source_code):
-        self.source_code = source_code
-        self.tokens = self.tokenize(source_code)
-        self.token_index = 0
+# Palabras reservadas
+reserved = {
+    'if': 'IF',
+    'else': 'ELSE',
+    'for': 'FOR', 
+    'while': 'WHILE', 
+    'do': 'DO',
+    'void': 'VOID', 
+    'return': 'RETURN',
+    'int': 'TYPE', 'float': 'TYPE', 'char': 'TYPE'
+}
 
-    def tokenize(self, source_code):
-        tokens = []
-        position = 0
-        while position < len(source_code):
-            match = None
-            # Ignorar espacios en blanco y saltos de línea
-            ignore_regex = re.compile(ignore_pattern)
-            ignore_match = ignore_regex.match(source_code, position)
-            if ignore_match:
-                position = ignore_match.end()
-                continue
+# Reglas para expresiones regulares simples
+t_PLUS = r'\+'; t_MINUS = r'-'; t_TIMES = r'\*'; t_DIVIDE = r'/'
+t_LPAREN = r'\('; t_RPAREN = r'\)'; t_LBRACE = r'\{'; t_RBRACE = r'\}'
+t_SEMICOLON = r';'; t_COMMA = r','; t_ASSIGN = r'='
+t_LT = r'<'; t_LE = r'<='; t_GT = r'>'; t_GE = r'>='; t_EQ = r'=='; t_NE = r'!='
+t_AND = r'&&'; t_OR = r'\|\|'; t_NOT = r'!'
 
-            for pattern, token_type in token_patterns:
-                regex = re.compile(pattern)
-                match = regex.match(source_code, position)
-                if match:
-                    value = match.group(0)
-                    tokens.append((token_type, value))
-                    position = match.end()
-                    break
+def t_INCLUDE(t):
+    r'\#include[ ]*<[^>]+>|\"[^"]+\"'
+    return t
 
-            if not match:
-                raise SyntaxError(f"Token no válido en la posición {position}")
-        return tokens
+# Reglas más complejas para ID y NUMBER
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value, 'ID')  # Check for reserved words
+    return t
 
-    def get_next_token(self):
-        if self.token_index < len(self.tokens):
-            token = self.tokens[self.token_index]
-            self.token_index += 1
-            return token
-        return ('EOF', None)  # Retorna EOF cuando se alcanza el final del código fuente
+# Token para comentarios de una línea y multilínea
+def t_COMMENT(t):
+    r'\/\/.*|\/\*[\s\S]*?\*\/'
+    pass  # Los comentarios son ignorados
 
+# Token para cadenas de caracteres
+def t_STRING(t):
+    r'\"([^\\\n]|(\\.))*?\"'
+    return t
 
-# Leer código y agregar tokens a la tabla de símbolos
+# Token para caracteres (puede que necesites esto dependiendo de tu código)
+def t_CHAR(t):
+    r"\'([^\\\n]|(\\.))*?\'"
+    return t
+
+# Token para números (enteros y flotantes)
+def t_NUMBER(t):
+    r'\d+(\.\d+)?'
+    t.value = float(t.value) if '.' in t.value else int(t.value)
+    return t
+
+# Caracteres ignorados
+t_ignore = ' \t'
+
+def t_error(t):
+    print(f"Illegal character {t.value[0]}")
+    t.lexer.skip(1)
+
+lexer = lex.lex()
