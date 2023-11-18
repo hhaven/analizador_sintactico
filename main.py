@@ -8,7 +8,7 @@ def main():
             lexer.input(source_code)
             parser.parse(source_code)
             print("Analisis sintactico completado con exito.")
-            # Aquí puedes imprimir o trabajar con tu tabla de símbolos
+            # imprimir tabla de simbolos
     except FileNotFoundError:
         print(f"No se pudo encontrar el archivo: {file_path}")
 

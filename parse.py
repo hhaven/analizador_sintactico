@@ -1,51 +1,61 @@
 import ply.yacc as yacc
 from lexer import tokens
-precedence = (
-    ('left', 'OR'),                    # Operador OR lógico
-    ('left', 'AND'),                   # Operador AND lógico
-    ('right', 'NOT'),                  # Operador NOT lógico
-    ('nonassoc', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE'),  # Operadores relacionales
-    ('left', 'PLUS', 'MINUS'),         # Operadores de suma y resta
-    ('left', 'TIMES', 'DIVIDE'),       # Operadores de multiplicación y división
-)
+from symboltable import SymbolTable
 
+# Crear una instancia de la tabla de símbolos
+symbol_table = SymbolTable()
+
+# Regla para el programa completo
 def p_program(p):
     '''program : program statement
                | statement
     '''
-    # Programa compuesto de múltiples declaraciones
+    # Programa compuesto de múltiples declaraciones o sentencias
 
+# Regla para las diferentes sentencias
 def p_statement(p):
-    '''statement : expression_statement
-                 | compound_statement
-                 | selection_statement
-                 | iteration_statement
-                 | jump_statement
+    '''statement : variable_declaration
+                 | conditional_statement
+                 | function_call SEMICOLON
+                 | return_statement
                  | function_declaration
     '''
-    # Diferentes tipos de declaraciones y sentencias
+    # Incluye declaraciones de variables, condicionales y llamadas a funciones
 
-def p_expression_statement(p):
-    '''expression_statement : expression SEMICOLON
-                            | SEMICOLON
+def p_return_statement(p):
+    '''return_statement : RETURN expression SEMICOLON
+                       | RETURN SEMICOLON
     '''
-    # Una expresión seguida de un punto y coma
+
+# Regla para la declaración de variables
+def p_variable_declaration(p):
+    '''variable_declaration : TYPE ID SEMICOLON'''
+    # Agregar variable a la tabla de símbolos
+    symbol_table.add(p[2], p[1], None, p.lineno(2))
+
+# Regla para las estructuras condicionales if-else
+def p_conditional_statement(p):
+    '''conditional_statement : IF LPAREN expression RPAREN compound_statement
+                             | IF LPAREN expression RPAREN compound_statement ELSE compound_statement'''
+    #
 
 def p_compound_statement(p):
     '''compound_statement : LBRACE statement_list RBRACE
-                          | LBRACE RBRACE
-    '''
-    # Bloque de código
+                          | LBRACE RBRACE'''
+    if len(p) == 3:
+        # Esto maneja un bloque vacío: {}
+        p[0] = None
+    else:
+        # Esto maneja un bloque con sentencias
+        p[0] = p[2]
 
-def p_statement_list(p):
-    '''statement_list : statement_list statement
-                      | statement
-    '''
-    # Lista de declaraciones o sentencias
-
-# Definición de expresiones (operadores aritméticos y lógicos)
+# Regla para las expresiones
 def p_expression(p):
-    '''expression : expression PLUS expression
+    '''expression : STRING
+                  | ID
+                  | NUMBER
+                  | LPAREN expression RPAREN
+                  | expression PLUS expression
                   | expression MINUS expression
                   | expression TIMES expression
                   | expression DIVIDE expression
@@ -55,62 +65,45 @@ def p_expression(p):
                   | expression GE expression
                   | expression EQ expression
                   | expression NE expression
-                  | expression AND expression
-                  | expression OR expression
-                  | NOT expression
-                  | LPAREN expression RPAREN
-                  | ID
-                  | NUMBER
     '''
+    # Expresiones, incluyendo operaciones aritméticas y comparaciones
 
-# Definiciones de selección (if-else)
-def p_selection_statement(p):
-    '''selection_statement : IF LPAREN expression RPAREN statement
-                           | IF LPAREN expression RPAREN statement ELSE statement
+# Regla para llamadas a funciones
+def p_function_call(p):
+    '''function_call : ID LPAREN argument_list RPAREN
+                     | ID LPAREN RPAREN
     '''
-    # Estructuras if y if-else
-
-# Definiciones de iteración (for, while, do-while)
-def p_iteration_statement(p):
-    '''iteration_statement : WHILE LPAREN expression RPAREN statement
-                           | DO statement WHILE LPAREN expression RPAREN SEMICOLON
-                           | FOR LPAREN expression_statement expression_statement expression RPAREN statement
-    '''
-    # Bucles for, while y do-while
-
-# Definiciones de salto (return)
-def p_jump_statement(p):
-    '''jump_statement : RETURN expression SEMICOLON
-                      | RETURN SEMICOLON
-    '''
-    # Instrucciones de retorno
-
-# Definición de la función
+# Regla para la declaración de funciones
 def p_function_declaration(p):
-    '''function_declaration : TYPE ID LPAREN params RPAREN compound_statement'''
-    # Definición de una función
-
-# Parámetros de la función
-def p_params(p):
-    '''params : param_list
-              | empty
+    '''function_declaration : TYPE ID LPAREN argument_list RPAREN LBRACE statement_list RBRACE
+                            | TYPE ID LPAREN RPAREN LBRACE statement_list RBRACE
     '''
-    # Lista de parámetros
 
-def p_param_list(p):
-    '''param_list : param_list COMMA TYPE ID
-                  | TYPE ID
+# Regla para la lista de argumentos en llamadas a funciones
+def p_argument_list(p):
+    '''argument_list : argument_list COMMA expression
+                     | expression
     '''
-    # Parámetros de función
+    # Lista de argumentos en una llamada a función
 
-def p_empty(p):
-    '''empty :'''
-    pass
+def p_statement_list(p):
+    '''statement_list : statement_list statement
+                      | statement
+    '''
+    if len(p) == 3:
+        # maneja multiples sentencias
+        p[0] = p[1] + [p[2]]
+    else:
+        # maneja una unica sentencia
+        p[0] = [p[1]]
 
+
+# Regla para manejar errores de sintaxis
 def p_error(p):
     if p:
-        print(f"Syntax error at {p.value}")
+        print(f"Syntax error at {p.value} on line {p.lineno}")
     else:
         print("Syntax error at EOF")
 
-parser = yacc.yacc()
+# Construir el parser
+parser = yacc.yacc(debug=True)
