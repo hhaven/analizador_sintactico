@@ -1,2 +1,6 @@
-__pycache__/
-.vscode/
+__pycache__/*
+.vscode/*
+ejemplo.py
+parser.out
+parsetab.py
+test_lexer.py
