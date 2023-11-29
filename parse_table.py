@@ -1,10 +1,10 @@
 instruction = 0
 func_dec = 1
-var_dec = 2
-aux_var_dec = 3
+func_or_var_dec = 2
+aux_func_or_var_dec = 3
 aux_add_dec = 4
 aux_var_asign = 5
-while_op = 6
+while_op = 6 # opcional
 conditions = 7
 bool_logic_conn = 8
 bool_logic = 9
@@ -12,7 +12,7 @@ logic_conn = 10
 operation = 11
 aux_operation = 12
 scanf = 13
-printf = 14
+printf = 14 # opcional
 aux_printf = 15
 add_mods = 16
 aux_mods = 17
@@ -40,13 +40,13 @@ table = [
     [instruction, 'BOOL', None],
     [instruction, 'LOGIC', None],
     [instruction, 'ASSIGN', None],
-    [instruction, 'INT', [var_dec, 'SEMICOLON', instruction]],
-    [instruction, 'FLOAT', [var_dec, 'SEMICOLON', instruction]],
-    [instruction, 'CHAR', [var_dec, 'SEMICOLON', instruction]],
+    [instruction, 'INT', [func_or_var_dec, 'SEMICOLON', instruction]],
+    [instruction, 'FLOAT', [func_or_var_dec, 'SEMICOLON', instruction]],
+    [instruction, 'CHAR', [func_or_var_dec, 'SEMICOLON', instruction]],
     [instruction, 'RELATIONAL', None],
     [instruction, 'OP', None],
     [instruction, 'MOD', None],
-    [instruction, 'ID', [aux_var_dec, 'SEMICOLON', instruction]],
+    [instruction, 'ID', [aux_func_or_var_dec, 'SEMICOLON', instruction]],
     [instruction, 'STRING', None],
     [instruction, 'NUMBER', None],
     [instruction, 'RETURN', ['RETURN', data, 'SEMICOLON']],
@@ -149,56 +149,56 @@ table = [
     [func_call, 'EOF', None],
 
     # 2
-    [var_dec, 'SEMICOLON', None],
-    [var_dec, 'COMMA', None],
-    [var_dec, 'WHILE', None],
-    [var_dec, 'LPAREN', None],
-    [var_dec, 'RPAREN', None],
-    [var_dec, 'LBRACE', None],
-    [var_dec, 'RBRACE', None],
-    [var_dec, 'READ', None],
-    [var_dec, 'QUOTES', None],
-    [var_dec, 'WRITE', None],
-    [var_dec, 'BOOL', None],
-    [var_dec, 'LOGIC', None],
-    [var_dec, 'ASSIGN', None],
-    [var_dec, 'INT', [datatype, aux_var_dec]],
-    [var_dec, 'FLOAT', [datatype, aux_var_dec]],
-    [var_dec, 'CHAR', [datatype, aux_var_dec]],
-    [var_dec, 'RELATIONAL', None],
-    [var_dec, 'OP', None],
-    [var_dec, 'MOD', None],
-    [var_dec, 'ID', None],
-    [var_dec, 'STRING', None],
-    [var_dec, 'NUMBER', None],
-    [var_dec, 'EOF', None],
+    [func_or_var_dec, 'SEMICOLON', None],
+    [func_or_var_dec, 'COMMA', None],
+    [func_or_var_dec, 'WHILE', None],
+    [func_or_var_dec, 'LPAREN', None],
+    [func_or_var_dec, 'RPAREN', None],
+    [func_or_var_dec, 'LBRACE', None],
+    [func_or_var_dec, 'RBRACE', None],
+    [func_or_var_dec, 'READ', None],
+    [func_or_var_dec, 'QUOTES', None],
+    [func_or_var_dec, 'WRITE', None],
+    [func_or_var_dec, 'BOOL', None],
+    [func_or_var_dec, 'LOGIC', None],
+    [func_or_var_dec, 'ASSIGN', None],
+    [func_or_var_dec, 'INT', [datatype, aux_func_or_var_dec]],
+    [func_or_var_dec, 'FLOAT', [datatype, aux_func_or_var_dec]],
+    [func_or_var_dec, 'CHAR', [datatype, aux_func_or_var_dec]],
+    [func_or_var_dec, 'RELATIONAL', None],
+    [func_or_var_dec, 'OP', None],
+    [func_or_var_dec, 'MOD', None],
+    [func_or_var_dec, 'ID', None],
+    [func_or_var_dec, 'STRING', None],
+    [func_or_var_dec, 'NUMBER', None],
+    [func_or_var_dec, 'EOF', None],
     # 3
-    [aux_var_dec, 'SEMICOLON', None ],
-    [aux_var_dec,  'COMMA', None ],
-    [aux_var_dec, 'WHILE', None ],
-    [aux_var_dec, 'LPAREN', None],
-    [aux_var_dec, 'RPAREN', None ],
-    [aux_var_dec, 'LBRACE', None ],
-    [aux_var_dec, 'RBRACE', None ],
-    [aux_var_dec, 'READ', None ],
-    [aux_var_dec, 'QUOTES', None ],
-    [aux_var_dec, 'WRITE', None ],
-    [aux_var_dec, 'BOOL', None ],
-    [aux_var_dec, 'LOGIC', None ],
-    [aux_var_dec, 'ASSIGN', None ],
-    [aux_var_dec, 'INT', None ],
-    [aux_var_dec, 'FLOAT', None ],
-    [aux_var_dec, 'CHAR', None ],
-    [aux_var_dec, 'RELATIONAL', None ],
-    [aux_var_dec, 'OP', None ],
-    [aux_var_dec, 'MOD', None ],
-    [aux_var_dec, 'ID', ['ID', aux_var_asign, aux_add_dec]],
-    [aux_var_dec, 'STRING', None ],
-    [aux_var_dec, 'NUMBER', None],
-    [aux_var_dec, 'EOF', None ],
+    [aux_func_or_var_dec, 'SEMICOLON', None ],
+    [aux_func_or_var_dec,  'COMMA', None ],
+    [aux_func_or_var_dec, 'WHILE', None ],
+    [aux_func_or_var_dec, 'LPAREN', None],
+    [aux_func_or_var_dec, 'RPAREN', None ],
+    [aux_func_or_var_dec, 'LBRACE', None ],
+    [aux_func_or_var_dec, 'RBRACE', None ],
+    [aux_func_or_var_dec, 'READ', None ],
+    [aux_func_or_var_dec, 'QUOTES', None ],
+    [aux_func_or_var_dec, 'WRITE', None ],
+    [aux_func_or_var_dec, 'BOOL', None ],
+    [aux_func_or_var_dec, 'LOGIC', None ],
+    [aux_func_or_var_dec, 'ASSIGN', None ],
+    [aux_func_or_var_dec, 'INT', None ],
+    [aux_func_or_var_dec, 'FLOAT', None ],
+    [aux_func_or_var_dec, 'CHAR', None ],
+    [aux_func_or_var_dec, 'RELATIONAL', None ],
+    [aux_func_or_var_dec, 'OP', None ],
+    [aux_func_or_var_dec, 'MOD', None ],
+    [aux_func_or_var_dec, 'ID', ['ID', aux_var_asign, aux_add_dec]],
+    [aux_func_or_var_dec, 'STRING', None ],
+    [aux_func_or_var_dec, 'NUMBER', None],
+    [aux_func_or_var_dec, 'EOF', None ],
     #4
     [aux_add_dec, 'SEMICOLON', ['empty']],
-    [aux_add_dec, 'COMMA', ['COMMA', aux_var_dec]],
+    [aux_add_dec, 'COMMA', ['COMMA', aux_func_or_var_dec]],
     [aux_add_dec, 'WHILE', None],
     [aux_add_dec, 'LPAREN', None],
     [aux_add_dec, 'RPAREN', None],
