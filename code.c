@@ -1,7 +1,9 @@
 #include <stdio.h>
+int y;
+
 int main() {
-   int x;
+   int x = 5;
    // printf() displays the string inside quotation
    printf("Hello, World!");
-   return 0;
 }
+int x;;

@@ -2,12 +2,14 @@ import ply.lex as lex
 
 # Lista de nombres de tokens
 tokens = [
-    'INCLUDE','STRING', 'ID', 'NUMBER', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
+    'INCLUDE', 'STRING', 'ID', 'NUMBER', 'QUOTES',
+    'READ', 'WRITE',
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
     'SEMICOLON', 'COMMA', 'ASSIGN',
-    'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'AND', 'OR', 'NOT',
+    'RELATIONAL', 'OP', 'LOGIC',
+    'EOF',
     # Palabras reservadas
-    'IF', 'ELSE', 'FOR', 'WHILE', 'DO', 'VOID', 'RETURN', 'TYPE'
+    'IF', 'ELSE', 'FOR', 'WHILE', 'DO', 'VOID', 'RETURN', 'INT', 'FLOAT', 'CHAR',
 ]
 
 # Palabras reservadas
@@ -19,21 +21,19 @@ reserved = {
     'do': 'DO',
     'void': 'VOID', 
     'return': 'RETURN',
-    'int': 'TYPE', 'float': 'TYPE', 'char': 'TYPE'
+    'int': 'INT', 'float': 'FLOAT', 'char': 'CHAR',
+    'scanf' : 'READ',
+    'printf':'WRITE',
 }
 
 # Reglas para expresiones regulares simples
-t_PLUS = r'\+'; t_MINUS = r'-'; t_TIMES = r'\*'; t_DIVIDE = r'/'
 t_LPAREN = r'\('; t_RPAREN = r'\)'; t_LBRACE = r'\{'; t_RBRACE = r'\}'
-t_SEMICOLON = r';'; t_COMMA = r','; t_ASSIGN = r'='
-t_LT = r'<'; t_LE = r'<='; t_GT = r'>'; t_GE = r'>='; t_EQ = r'=='; t_NE = r'!='
-t_AND = r'&&'; t_OR = r'\|\|'; t_NOT = r'!'
-
+t_SEMICOLON = r';'; t_COMMA = r','; t_ASSIGN = r'='; t_QUOTES = r'\"' ; t_EOF = r'\$'
 
 def t_INCLUDE(t):
     r'\#include[ ]*<[^>]+>'  # Esta parte reconoce el formato #include <nombre>
     t.lexer.lineno += t.value.count('\n')  # Incrementa el número de línea según los saltos de línea en el comentario
-    pass  # Los comentarios son ignorados
+    pass  # include ignorados
 
 # Token para cadenas de caracteres
 def t_STRING(t):
@@ -66,6 +66,21 @@ def t_NUMBER(t):
     #print(f"NUMBER token: {t.value}, Line: {t.lineno}")
     return t
 
+# Token para operadores
+def t_OP(t):
+    r'(\+)|(\-)|(\*)|(\/)|(\%)'
+    return t
+
+# Token para operadores logicos
+def t_LOGIC(t):
+    r'(\>=)|(\<=)|(\==)|(\!=)|(\<)|(\>)'
+    return t
+
+# Token para relaciones && ||
+def t_RELATIONAL(t):
+    r'(\&{2})|(\|{2})'
+    return t
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
@@ -73,7 +88,7 @@ def t_newline(t):
 t_ignore = ' \t'
 
 def t_error(t):
-    print(f"Illegal character {t.value[0]}")
+    #print(f"Illegal character {t.value[0]}")
     t.lexer.skip(1)
 
-lexer = lex.lex()
+lexer = lex.lex(debug=1)
