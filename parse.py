@@ -9,59 +9,64 @@ stack = ["EOF", 0]
 
 def parse():
     # Abre y lee un archivo de código fuente.
-    f = open('code.c', 'r')
+    f = open('code2.c', 'r')
     code = f.read()
     lexer.input(code)    
     tok=lexer.token()
     x=stack[-1] #primer elemento de la pila
     # Bucle principal de análisis.
     while True:    
+        if x is not None and tok is not None:
         #Manejo de Tokens y Pila
-        if x == tok.type and x != 'EOF':
-            symbol_table_insert(tok.value, tok.type, tok.lineno, tok.lexpos)
-            stack.pop()
-            x=stack[-1]
-            tok=lexer.token()
-        #Manejo de errores                
-        if x in tokens and x != tok.type:
-            print("Error: se esperaba ", tok.type)
-            print("En posición:", tok.lexpos)
-            print("En linea:", tok.lex)
-            
-            return 0;
-        #Manejo de No Terminales
-        if x not in tokens:
-            if tok is None:
-                print("Analisis sintactico completado con exito")
-                return #aceptar
-            print("van entrar a la tabla:")
-            print(x)
-            print(tok.type)
-            print("En linea:", tok.lineno)
-            print("Con valor: ", tok.value)
-            celda=search_in_table(x,tok.type)      
-            #Manejo de Errores y Recuperación                      
-            if  celda is None:
-                print("Error detectado")
-                expected_tokens = find_expected_tokens(x)
-                print("Error: se esperaba uno de", expected_tokens, "pero se encontró", tok.type)
+            if x == tok.type:
+                symbol_table_insert(tok.value, tok.type, tok.lineno, tok.lexpos)
+                stack.pop()
+                x=stack[-1]
+                tok=lexer.token()
+        #Manejo de errores           
+            if x in tokens and x != tok.type:
+                print("Error: se esperaba ", x)
+                print("Se encontro: ", tok.type)
                 print("En posición:", tok.lexpos)
                 print("En linea:", tok.lineno)
-                print("celda: ", celda)
-                print("Entrando en modo pánico...")
-                tok = panic_mode_recovery(expected_tokens, tok)
-                if tok is None or tok.type == 'EOF':
-                    print("No se pudo recuperar del error.")
-                    return 0
-                # Reanuda el análisis después de la recuperación
-                x = stack[-1]
+                tok = panic_mode_recovery(x, tok)
                 continue
-            else:
-                stack.pop()
-                agregar_pila(celda)
-                print(stack)
-                print("/------------------------------------------------------------------------------/")
-                x=stack[-1]
+            if x not in tokens:
+                if tok is None:
+                    print("Analisis sintactico completado con exito")
+                    return #aceptar
+                print("van entrar a la tabla:")
+                print(x)
+                print(tok.type)
+                print("En linea:", tok.lineno)
+                print("Con valor: ", tok.value)
+                celda=search_in_table(x,tok.type)      
+                #Manejo de Errores y Recuperación                      
+                if  celda is None:
+                    expected_tokens = find_expected_tokens(x)
+                    print("Error: se esperaba uno de", expected_tokens, "pero se encontró", tok.type)
+                    print("En posición:", tok.lexpos)
+                    print("En linea:", tok.lineno)
+                    print("celda: ", celda)
+                    print("Entrando en modo pánico...")
+                    tok = panic_mode_recovery(expected_tokens, tok)
+                    if tok is None or tok.type == 'EOF':
+                        print("No se pudo recuperar del error.")
+                        return 0
+                    # Reanuda el análisis después de la recuperación
+                    x = stack[-1]
+                    continue
+                else:
+                    stack.pop()
+                    agregar_pila(celda)
+                    print(stack)
+                    print("/------------------------------------------------------------------------------/")
+                    x=stack[-1]
+        else:
+            print("Analisis sintactico completado con exito")
+            return 0;
+        #Manejo de No Terminales
+        
             
 
 
@@ -78,15 +83,16 @@ def panic_mode_recovery(recovery_tokens, tok):
     # Bucles que buscan un token de recuperacion y ajustan la pila.
     while tok is not None and tok.type not in recovery_tokens:
         tok = lexer.token()
+        print(f"Buscando {recovery_tokens}")
     while stack and (stack[-1] not in recovery_tokens and stack[-1] in tokens):
         stack.pop()
 
     if stack and tok is not None:
-        barra_de_progreso(2)
+        barra_de_progreso(1)
         print(f"Recuperación exitosa, próximo token: {tok.type}, próximo en la pila: {stack[-1]}")
         return tok
     else:
-        barra_de_progreso(2)
+        barra_de_progreso(1)
         print("La pila está vacía después de la recuperación del modo pánico.")
         return tok
 def search_in_table(no_terminal, terminal):
@@ -115,11 +121,11 @@ def symbol_table_insert(name, var_type, line, pos):
 
 # Mostrar la tabla de símbolos
 def symbol_table_print():
-    print("Nombre              Tipo               Línea   Posicion")
-    print("-------------------------------------------------------")
+    print("Nombre                             Tipo              Linea    Posicion")
+    print("----------------------------------------------------------------------")
     for name, entries in symbol_table.items():
         for entry in entries:
-            print(f"{name:20}{entry['type']:10}{entry['line']:10}{entry['pos']:10}")
+            print(f"{name:<35}{entry['type']:10}{entry['line']:10}{entry['pos']:10}")
 
 
 # Buscar en la tabla de símbolos

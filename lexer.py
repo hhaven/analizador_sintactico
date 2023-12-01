@@ -9,7 +9,7 @@ tokens = [
     'RELATIONAL', 'OP', 'LOGIC',
     'EOF',
     # Palabras reservadas
-    'IF', 'ELSE', 'FOR', 'WHILE', 'DO', 'VOID', 'RETURN', 'INT', 'FLOAT', 'CHAR',
+    'IF', 'ELSE', 'FOR', 'WHILE', 'IF', 'ELSE', 'DO', 'VOID', 'RETURN', 'INT', 'FLOAT', 'CHAR',
 ]
 
 # Palabras reservadas
@@ -18,6 +18,8 @@ reserved = {
     'else': 'ELSE',
     'for': 'FOR', 
     'while': 'WHILE', 
+    'if': 'IF',
+    'else': 'ELSE',
     'do': 'DO',
     'void': 'VOID', 
     'return': 'RETURN',
