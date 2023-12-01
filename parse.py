@@ -7,10 +7,8 @@ import sys
 
 stack = ["EOF", 0]
 
-def parse():
+def parse(code):
     # Abre y lee un archivo de código fuente.
-    f = open('code2.c', 'r')
-    code = f.read()
     lexer.input(code)    
     tok=lexer.token()
     x=stack[-1] #primer elemento de la pila
@@ -144,5 +142,4 @@ def symbol_table_delete(name):
     else:
         print(f"No se pudo eliminar '{name}' porque no se encuentra en la tabla de símbolos.")
 
-parse()
 symbol_table_print()

@@ -1,14 +1,12 @@
 from lexer import lexer
-from parse import parse
+from parse import parse, symbol_table_print
 def main():
     file_path = "code.c"
     try:
-        with open(file_path, 'r') as file:
-            source_code = file.read()
-            lexer.input(source_code)
-            parse()
-            print("Analisis sintactico completado con exito.")
-            # imprimir tabla de simbolos
+        f = open(file_path, 'r')
+        code = f.read()
+        parse(code)
+        symbol_table_print()
     except FileNotFoundError:
         print(f"No se pudo encontrar el archivo: {file_path}")
 
